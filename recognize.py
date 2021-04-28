@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 from glob import glob
 from io import BytesIO
 from functools import reduce
@@ -124,17 +125,33 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-d", "--debug", help="Saves debug output to debug.html",
                         action="store_true")
-    parser.add_argument("image_path", help="Path/glob to PNG chessboard image(s)")
+    parser.add_argument("--image_path", nargs='+', help="Path/glob to PNG chessboard image(s)")
+
     args = parser.parse_args()
+
+
+    # print('printing args',args)
     if not args.quiet:
         print('Tensorflow {}'.format(tf.version.VERSION))
     model = models.load_model(NN_MODEL_PATH)
+    fens = []
     # tile_img_path = glob(TILES_DIR + '/*/*.png')[0]
     # print(tile_img_path)
     # print(predict_tile(image_data(tile_img_path)))
     if len(sys.argv) > 1:
+
         with open(OUT_FILE, "w") as f:
             f.write('<link rel="stylesheet" href="./web/style.css" />')
-        for chessboard_image_path in sorted(glob(args.image_path)):
-            print(predict_chessboard(chessboard_image_path, args))
+
+        file_paths = sorted(args.image_path)
+        for chessboard_image_path in file_paths:
+            
+            fen = predict_chessboard(chessboard_image_path, args)
+            print (fen)
+            fens.append(fen)
+            
+        fenstr = '\n'.join(fens)
+        with open('./fenlist.txt', "w") as f:
+            f.write(fenstr)
+        
 
